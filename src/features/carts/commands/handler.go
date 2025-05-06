@@ -60,5 +60,14 @@ func (h *CommandHandler) HandleAddToCart(cmd *add_to_cart.Command) error {
 }
 
 func (h *CommandHandler) HandleRemoveFromCart(cmd *remove_from_cart.Command) error {
+	err := h.repository.RemoveFromCart(cmd.CartID, cmd.ProductID)
+	if err != nil {
+		return err
+	}
+
+	err = h.productsService.UnlockProducts([]string{cmd.ProductID})
+	if err != nil {
+		return err
+	}
 	return nil
 }
