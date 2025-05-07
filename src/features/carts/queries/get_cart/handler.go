@@ -1,11 +1,11 @@
-package queries
+package get_cart
 
 import (
 	"errors"
 
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries"
 )
 
 type ReadRepository interface {
@@ -17,37 +17,29 @@ type ProductsService interface {
 	GetProductsByIDs(productIDs []string) ([]products.Product, error)
 }
 
-type newCartBuilderFunc func([]data.CartEvent) *get_cart.CartBuilder
+type newCartBuilderFunc func([]data.CartEvent) *CartBuilder
 
-type Handler interface {
-	Handle(query interface{}) (interface{}, error)
-}
-
-type QueryHandler struct {
+type Handler struct {
 	repository      ReadRepository
 	productsService ProductsService
 	newCartBuilder  newCartBuilderFunc
 }
 
-func NewQueryHandler(repo ReadRepository, productsSvc ProductsService, newCartBuilderFunc newCartBuilderFunc) *QueryHandler {
-	return &QueryHandler{
+func NewHandler(repo ReadRepository, productsSvc ProductsService, newCartBuilderFunc newCartBuilderFunc) *Handler {
+	return &Handler{
 		productsService: productsSvc,
 		repository:      repo,
 		newCartBuilder:  newCartBuilderFunc,
 	}
 }
 
-func (h *QueryHandler) Handle(query interface{}) (interface{}, error) {
-	switch q := query.(type) {
-	case *get_cart.Query:
-		return h.handleGetCart(q)
-	default:
-		return nil, errors.New(ErrInvalidQuery)
+func (h *Handler) Handle(query interface{}) (interface{}, error) {
+	qr, ok := query.(*Query)
+	if !ok {
+		return nil, errors.New(queries.ErrInvalidQuery)
 	}
-}
 
-func (h *QueryHandler) handleGetCart(query *get_cart.Query) (interface{}, error) {
-	events, err := h.repository.GetCartEvents(query.CartID)
+	events, err := h.repository.GetCartEvents(qr.CartID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +50,6 @@ func (h *QueryHandler) handleGetCart(query *get_cart.Query) (interface{}, error)
 		return nil, err
 	}
 
-	cart := cartBuilder.WithCartID(query.CartID).Build(productDetails)
+	cart := cartBuilder.WithCartID(qr.CartID).Build(productDetails)
 	return cart, nil
 }

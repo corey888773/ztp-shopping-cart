@@ -1,13 +1,15 @@
 package service
 
 import (
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/add_to_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/remove_from_cart"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
 )
 
-var _ commands.ProductsService = (*ProductClientMock)(nil)
-var _ queries.ProductsService = (*ProductClientMock)(nil)
+var _ add_to_cart.ProductsService = (*ProductClientMock)(nil)
+var _ remove_from_cart.ProductsService = (*ProductClientMock)(nil)
+var _ get_cart.ProductsService = (*ProductClientMock)(nil)
 
 type ProductClientMock struct {
 }

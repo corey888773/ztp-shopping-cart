@@ -5,11 +5,15 @@ import (
 	"github.com/corey888773/ztp-shopping-cart/src/common/util"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/api/v1/add_to_cart"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/api/v1/get_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/api/v1/remove_from_cart"
 	cartcommands "github.com/corey888773/ztp-shopping-cart/src/features/carts/commands"
+	add_to_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/add_to_cart"
+	remove_from_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/remove_from_cart"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data/repository"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products/service"
 	cartquerries "github.com/corey888773/ztp-shopping-cart/src/features/carts/queries"
 	cart "github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
+	get_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,8 +42,16 @@ func NewServer(config util.Config) (*Srv, error) {
 	writeCartRepository := repository.NewWriteCartRepository(postgresConn.DB)
 	readCartRepository := repository.NewReadCartRepository(postgresConn.DB)
 
-	cartCommandHandler := cartcommands.NewCommandHandler(writeCartRepository, productsService)
-	cartQueryHandler := cartquerries.NewQueryHandler(readCartRepository, productsService, cart.ApplyEvents)
+	addToCartHandler := add_to_cart2.NewHandler(writeCartRepository, productsService)
+	removeFromCartHandler := remove_from_cart2.NewHandler(writeCartRepository, productsService)
+
+	cartCommandHandler := cartcommands.NewCommandBus()
+	cartCommandHandler.Register(&add_to_cart2.Command{}, addToCartHandler)
+	cartCommandHandler.Register(&remove_from_cart2.Command{}, removeFromCartHandler)
+
+	getCartHandler := get_cart2.NewHandler(readCartRepository, productsService, cart.ApplyEvents)
+	cartQueryHandler := cartquerries.NewQueryBus()
+	cartQueryHandler.Register(&get_cart2.Query{}, getCartHandler)
 
 	return &Srv{
 		Router:             gin.Default(),
@@ -52,6 +64,7 @@ func NewServer(config util.Config) (*Srv, error) {
 func (s *Srv) SetupRouter() {
 	carts := s.Router.Group("/api/v1/carts")
 	carts.POST("/", add_to_cart.AddToCart(s.CartCommandHandler))
+	carts.DELETE("/", remove_from_cart.RemoveFromCart(s.CartCommandHandler))
 	carts.GET("/:id", get_cart.GetCart(s.CartQueryHandler))
 }
 

@@ -2,11 +2,11 @@ package repository
 
 import (
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
 	"gorm.io/gorm"
 )
 
-var _ queries.ReadRepository = (*ReadCartRepository)(nil)
+var _ get_cart.ReadRepository = (*ReadCartRepository)(nil)
 
 type ReadCartRepository struct {
 	db *gorm.DB

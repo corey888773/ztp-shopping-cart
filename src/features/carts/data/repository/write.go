@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/add_to_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/remove_from_cart"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data"
 	"gorm.io/gorm"
 )
 
-var _ commands.WriteRepository = (*WriteCartRepository)(nil)
+var _ add_to_cart.WriteRepository = (*WriteCartRepository)(nil)
+var _ remove_from_cart.WriteRepository = (*WriteCartRepository)(nil)
 
 type WriteCartRepository struct {
 	db *gorm.DB
