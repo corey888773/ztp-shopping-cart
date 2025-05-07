@@ -3,7 +3,7 @@ package add_to_cart
 import (
 	"errors"
 
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands"
+	"github.com/corey888773/ztp-shopping-cart/src/common/commands"
 )
 
 type WriteRepository interface {

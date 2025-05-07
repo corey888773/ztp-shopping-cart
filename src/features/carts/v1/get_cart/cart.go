@@ -1,8 +1,8 @@
 package get_cart
 
 import (
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products"
+	"github.com/corey888773/ztp-shopping-cart/src/data/events"
+	"github.com/corey888773/ztp-shopping-cart/src/external/products"
 )
 
 type CartBuilder struct {
@@ -20,13 +20,13 @@ type Cart struct {
 	Products []Product `json:"products"`
 }
 
-func ApplyEvents(events []data.CartEvent) *CartBuilder {
+func ApplyEvents(ev []events.CartEvent) *CartBuilder {
 	cb := &CartBuilder{}
-	for _, event := range events {
+	for _, event := range ev {
 		switch event.EventType {
-		case data.EventTypeAddToCart:
+		case events.EventTypeAddToCart:
 			cb.addProduct(event.ProductID, event.Quantity)
-		case data.EventTypeRemoveFromCart:
+		case events.EventTypeRemoveFromCart:
 			cb.removeProduct(event.ProductID)
 		}
 	}

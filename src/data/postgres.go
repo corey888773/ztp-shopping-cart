@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data"
+	"github.com/corey888773/ztp-shopping-cart/src/data/events"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -46,7 +46,7 @@ func NewPostgresConnector(config PostgresConfig) (*PostgresConnector, error) {
 	// Register models
 
 	// auto migrate the database
-	err = db.AutoMigrate(&data.CartEvent{})
+	err = db.AutoMigrate(&events.CartEvent{})
 
 	return &PostgresConnector{
 		DB: db,

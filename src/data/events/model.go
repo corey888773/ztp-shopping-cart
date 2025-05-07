@@ -1,4 +1,4 @@
-package data
+package events
 
 type EventType string
 

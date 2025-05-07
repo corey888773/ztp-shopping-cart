@@ -3,13 +3,13 @@ package get_cart
 import (
 	"errors"
 
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries"
+	"github.com/corey888773/ztp-shopping-cart/src/common/queries"
+	"github.com/corey888773/ztp-shopping-cart/src/data/events"
+	"github.com/corey888773/ztp-shopping-cart/src/external/products"
 )
 
 type ReadRepository interface {
-	GetCartEvents(cartID string) ([]data.CartEvent, error)
+	GetCartEvents(cartID string) ([]events.CartEvent, error)
 }
 
 type ProductsService interface {
@@ -17,7 +17,7 @@ type ProductsService interface {
 	GetProductsByIDs(productIDs []string) ([]products.Product, error)
 }
 
-type newCartBuilderFunc func([]data.CartEvent) *CartBuilder
+type newCartBuilderFunc func([]events.CartEvent) *CartBuilder
 
 type Handler struct {
 	repository      ReadRepository
@@ -39,11 +39,11 @@ func (h *Handler) Handle(query interface{}) (interface{}, error) {
 		return nil, errors.New(queries.ErrInvalidQuery)
 	}
 
-	events, err := h.repository.GetCartEvents(qr.CartID)
+	evs, err := h.repository.GetCartEvents(qr.CartID)
 	if err != nil {
 		return nil, err
 	}
-	cartBuilder := h.newCartBuilder(events)
+	cartBuilder := h.newCartBuilder(evs)
 
 	productDetails, err := h.productsService.GetProductsByIDs(cartBuilder.GetProductsList())
 	if err != nil {

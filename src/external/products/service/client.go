@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/add_to_cart"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/remove_from_cart"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/external/products"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/add_to_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/get_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/remove_from_cart"
 )
 
 var _ add_to_cart.ProductsService = (*ProductClientMock)(nil)

@@ -1,27 +1,24 @@
 package common
 
 import (
-	"github.com/corey888773/ztp-shopping-cart/src/common/data"
+	cartcommands "github.com/corey888773/ztp-shopping-cart/src/common/commands"
+	cartquerries "github.com/corey888773/ztp-shopping-cart/src/common/queries"
 	"github.com/corey888773/ztp-shopping-cart/src/common/util"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/api/v1/add_to_cart"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/api/v1/get_cart"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/api/v1/remove_from_cart"
-	cartcommands "github.com/corey888773/ztp-shopping-cart/src/features/carts/commands"
-	add_to_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/add_to_cart"
-	remove_from_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/commands/remove_from_cart"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/data/repository"
-	"github.com/corey888773/ztp-shopping-cart/src/features/carts/external/products/service"
-	cartquerries "github.com/corey888773/ztp-shopping-cart/src/features/carts/queries"
-	cart "github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
-	get_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/queries/get_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/data"
+	"github.com/corey888773/ztp-shopping-cart/src/data/events/repository"
+	"github.com/corey888773/ztp-shopping-cart/src/external/products/service"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/add_to_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/checkout"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/get_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/remove_from_cart"
 	"github.com/gin-gonic/gin"
 )
 
 type Srv struct {
-	Router             *gin.Engine
-	PostgresConn       *data.PostgresConnector
-	CartCommandHandler cartcommands.Handler
-	CartQueryHandler   cartquerries.Handler
+	Router         *gin.Engine
+	PostgresConn   *data.PostgresConnector
+	CartCommandBus cartcommands.Handler
+	CartQueryBus   cartquerries.Handler
 }
 
 func NewServer(config util.Config) (*Srv, error) {
@@ -42,30 +39,35 @@ func NewServer(config util.Config) (*Srv, error) {
 	writeCartRepository := repository.NewWriteCartRepository(postgresConn.DB)
 	readCartRepository := repository.NewReadCartRepository(postgresConn.DB)
 
-	addToCartHandler := add_to_cart2.NewHandler(writeCartRepository, productsService)
-	removeFromCartHandler := remove_from_cart2.NewHandler(writeCartRepository, productsService)
+	// Queries
+	cartQueryBus := cartquerries.NewQueryBus()
 
-	cartCommandHandler := cartcommands.NewCommandBus()
-	cartCommandHandler.Register(&add_to_cart2.Command{}, addToCartHandler)
-	cartCommandHandler.Register(&remove_from_cart2.Command{}, removeFromCartHandler)
+	getCartHandler := get_cart.NewHandler(readCartRepository, productsService, get_cart.ApplyEvents)
+	cartQueryBus.Register(&get_cart.Query{}, getCartHandler)
 
-	getCartHandler := get_cart2.NewHandler(readCartRepository, productsService, cart.ApplyEvents)
-	cartQueryHandler := cartquerries.NewQueryBus()
-	cartQueryHandler.Register(&get_cart2.Query{}, getCartHandler)
+	// Commands
+	cartCommandBus := cartcommands.NewCommandBus()
+
+	addToCartHandler := add_to_cart.NewHandler(writeCartRepository, productsService)
+	removeFromCartHandler := remove_from_cart.NewHandler(writeCartRepository, productsService)
+
+	cartCommandBus.Register(&add_to_cart.Command{}, addToCartHandler)
+	cartCommandBus.Register(&remove_from_cart.Command{}, removeFromCartHandler)
 
 	return &Srv{
-		Router:             gin.Default(),
-		PostgresConn:       postgresConn,
-		CartCommandHandler: cartCommandHandler,
-		CartQueryHandler:   cartQueryHandler,
+		Router:         gin.Default(),
+		PostgresConn:   postgresConn,
+		CartCommandBus: cartCommandBus,
+		CartQueryBus:   cartQueryBus,
 	}, nil
 }
 
 func (s *Srv) SetupRouter() {
 	carts := s.Router.Group("/api/v1/carts")
-	carts.POST("/", add_to_cart.AddToCart(s.CartCommandHandler))
-	carts.DELETE("/", remove_from_cart.RemoveFromCart(s.CartCommandHandler))
-	carts.GET("/:id", get_cart.GetCart(s.CartQueryHandler))
+	carts.POST("/", add_to_cart.AddToCart(s.CartCommandBus))
+	carts.DELETE("/", remove_from_cart.RemoveFromCart(s.CartCommandBus))
+	carts.GET("/:id", get_cart.GetCart(s.CartQueryBus))
+	carts.POST("/checkout", checkout.Checkout(s.CartCommandBus))
 }
 
 func (s *Srv) Start(httpAddress string) error {
