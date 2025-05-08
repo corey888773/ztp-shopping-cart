@@ -1,6 +1,8 @@
 package get_cart
 
 import (
+	"encoding/json"
+
 	"github.com/corey888773/ztp-shopping-cart/src/data/events"
 	"github.com/corey888773/ztp-shopping-cart/src/external/products"
 )
@@ -20,31 +22,44 @@ type Cart struct {
 	Products []Product `json:"products"`
 }
 
-func ApplyEvents(ev []events.CartEvent) *CartBuilder {
+func NewCartBuilderFromEvents(ev []events.CartEvent) *CartBuilder {
 	cb := &CartBuilder{}
 	for _, event := range ev {
 		switch event.EventType {
 		case events.EventTypeAddToCart:
-			cb.addProduct(event.ProductID, event.Quantity)
+			cb.addProduct(event.Payload)
 		case events.EventTypeRemoveFromCart:
-			cb.removeProduct(event.ProductID)
+			cb.removeProduct(event.Payload)
+		case events.EventTypeCheckout:
+			// Just stop processing events after checkout
+			return cb
 		}
 	}
 	return cb
 }
 
-func (cb *CartBuilder) addProduct(productID string, quantity int) {
+func (cb *CartBuilder) addProduct(payload string) {
+	var addToCartPayload events.AddToCartPayload
+	if err := json.Unmarshal([]byte(payload), &addToCartPayload); err != nil {
+		return
+	}
+
 	if cb.Products == nil {
 		cb.Products = make(map[string]int)
 	}
-	cb.Products[productID] += quantity
+	cb.Products[addToCartPayload.ProductID] += addToCartPayload.Quantity
 }
 
-func (cb *CartBuilder) removeProduct(productID string) {
+func (cb *CartBuilder) removeProduct(payload string) {
+	var removeFromCartPayload events.RemoveFromCartPayload
+	if err := json.Unmarshal([]byte(payload), &removeFromCartPayload); err != nil {
+		return
+	}
+
 	if cb.Products == nil {
 		return
 	}
-	delete(cb.Products, productID)
+	delete(cb.Products, removeFromCartPayload.ProductID)
 }
 
 func (cb *CartBuilder) GetProductsList() []string {

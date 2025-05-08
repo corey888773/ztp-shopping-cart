@@ -1,20 +1,31 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/corey888773/ztp-shopping-cart/src/data/events"
-	add_to_cart2 "github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/add_to_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/add_to_cart"
+	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/checkout"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/remove_from_cart"
 	"gorm.io/gorm"
 )
 
-var _ add_to_cart2.WriteRepository = (*WriteCartRepository)(nil)
+var _ add_to_cart.WriteRepository = (*WriteCartRepository)(nil)
 var _ remove_from_cart.WriteRepository = (*WriteCartRepository)(nil)
+var _ checkout.WriteRepository = (*WriteCartRepository)(nil)
 
 type WriteCartRepository struct {
 	db *gorm.DB
+}
+
+func (w WriteCartRepository) Checkout(command checkout.Command) error {
+	event := events.CartEvent{
+		CartID:    command.CartID,
+		EventType: events.EventTypeCheckout,
+	}
+	return w.addEventWithRetry(event, 3)
 }
 
 func NewWriteCartRepository(db *gorm.DB) *WriteCartRepository {
@@ -23,24 +34,40 @@ func NewWriteCartRepository(db *gorm.DB) *WriteCartRepository {
 	}
 }
 
-func (w WriteCartRepository) AddToCart(cmd add_to_cart2.Command) error {
-	event := events.CartEvent{
-		CartID:    cmd.CartID,
+func (w WriteCartRepository) AddToCart(cmd add_to_cart.Command) error {
+	payload, err := json.Marshal(events.AddToCartPayload{
 		ProductID: cmd.ProductID,
 		Quantity:  cmd.Quantity,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
-	return w.addEventWithRetry(event, events.EventTypeAddToCart, 3)
+
+	event := events.CartEvent{
+		CartID:    cmd.CartID,
+		EventType: events.EventTypeAddToCart,
+		Payload:   string(payload),
+	}
+	return w.addEventWithRetry(event, 3)
 }
 
 func (w WriteCartRepository) RemoveFromCart(cartID string, productID string) error {
+	payload, err := json.Marshal(events.RemoveFromCartPayload{
+		ProductID: productID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
 	event := events.CartEvent{
 		CartID:    cartID,
-		ProductID: productID,
+		EventType: events.EventTypeRemoveFromCart,
+		Payload:   string(payload),
 	}
-	return w.addEventWithRetry(event, events.EventTypeRemoveFromCart, 3)
+	return w.addEventWithRetry(event, 3)
 }
 
-func (w WriteCartRepository) addEventWithRetry(event events.CartEvent, eventType events.EventType, maxRetries int) error {
+func (w WriteCartRepository) addEventWithRetry(event events.CartEvent, maxRetries int) error {
 	var err error
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
@@ -53,7 +80,6 @@ func (w WriteCartRepository) addEventWithRetry(event events.CartEvent, eventType
 				return err
 			}
 
-			event.EventType = eventType
 			event.SequenceNumber = maxSequence + 1
 			event.CreatedAt = time.Now().String()
 

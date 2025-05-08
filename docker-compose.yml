@@ -1,0 +1,30 @@
+networks:
+  ztp:
+    driver: bridge
+
+services:
+  mongo-db:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    hostname:
+      shopping-cart-postgres
+    networks:
+      - ztp
+    container_name:
+      shopping-cart-postgres
+
+volumes:
+  postgres-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./postgres-data
+      o: bind

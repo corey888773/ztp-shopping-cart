@@ -12,8 +12,16 @@ const (
 type CartEvent struct {
 	CartID         string    `json:"cart_id" gorm:"primaryKey;column:cart_id"`
 	SequenceNumber int       `json:"sequence_number" gorm:"primaryKey;column:sequence_number;autoIncrement:false"`
-	ProductID      string    `json:"product_id" gorm:"column:product_id"`
 	EventType      EventType `json:"event_type" gorm:"column:event_type"`
-	Quantity       int       `json:"quantity" gorm:"column:quantity"`
 	CreatedAt      string    `json:"created_at" gorm:"column:created_at"`
+	Payload        string    `json:"payload" gorm:"column:payload"`
+}
+
+type RemoveFromCartPayload struct {
+	ProductID string `json:"product_id"`
+}
+
+type AddToCartPayload struct {
+	ProductID string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
 }

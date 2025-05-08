@@ -6,6 +6,7 @@ import (
 	"github.com/corey888773/ztp-shopping-cart/src/common/util"
 	"github.com/corey888773/ztp-shopping-cart/src/data"
 	"github.com/corey888773/ztp-shopping-cart/src/data/events/repository"
+	notifications "github.com/corey888773/ztp-shopping-cart/src/external/notifications/service"
 	"github.com/corey888773/ztp-shopping-cart/src/external/products/service"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/add_to_cart"
 	"github.com/corey888773/ztp-shopping-cart/src/features/carts/v1/checkout"
@@ -34,7 +35,8 @@ func NewServer(config util.Config) (*Srv, error) {
 		return nil, err
 	}
 
-	productsService := service.ProductClientMock{}
+	productsService := products.ClientMock{}
+	notificationService := notifications.MockClient{}
 
 	writeCartRepository := repository.NewWriteCartRepository(postgresConn.DB)
 	readCartRepository := repository.NewReadCartRepository(postgresConn.DB)
@@ -42,7 +44,7 @@ func NewServer(config util.Config) (*Srv, error) {
 	// Queries
 	cartQueryBus := cartquerries.NewQueryBus()
 
-	getCartHandler := get_cart.NewHandler(readCartRepository, productsService, get_cart.ApplyEvents)
+	getCartHandler := get_cart.NewHandler(readCartRepository, productsService, get_cart.NewCartBuilderFromEvents)
 	cartQueryBus.Register(&get_cart.Query{}, getCartHandler)
 
 	// Commands
@@ -50,9 +52,11 @@ func NewServer(config util.Config) (*Srv, error) {
 
 	addToCartHandler := add_to_cart.NewHandler(writeCartRepository, productsService)
 	removeFromCartHandler := remove_from_cart.NewHandler(writeCartRepository, productsService)
+	checkoutHandler := checkout.NewHandler(writeCartRepository, productsService, getCartHandler, notificationService, readCartRepository)
 
 	cartCommandBus.Register(&add_to_cart.Command{}, addToCartHandler)
 	cartCommandBus.Register(&remove_from_cart.Command{}, removeFromCartHandler)
+	cartCommandBus.Register(&checkout.Command{}, checkoutHandler)
 
 	return &Srv{
 		Router:         gin.Default(),
@@ -67,7 +71,7 @@ func (s *Srv) SetupRouter() {
 	carts.POST("/", add_to_cart.AddToCart(s.CartCommandBus))
 	carts.DELETE("/", remove_from_cart.RemoveFromCart(s.CartCommandBus))
 	carts.GET("/:id", get_cart.GetCart(s.CartQueryBus))
-	carts.POST("/checkout", checkout.Checkout(s.CartCommandBus))
+	carts.POST("/checkout/:id", checkout.Checkout(s.CartCommandBus))
 }
 
 func (s *Srv) Start(httpAddress string) error {
