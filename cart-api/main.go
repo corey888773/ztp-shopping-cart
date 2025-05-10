@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/app"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
 )
@@ -17,7 +18,7 @@ func main() {
 		log.Println("Shutting down the application in 2 seconds...")
 	}()
 
-	config, err := util.LoadConfig(".")
+	config, err := util.LoadConfig[common.Config](".")
 	if err != nil {
 		util.CancelWithPanic(appCancel, err)
 	}

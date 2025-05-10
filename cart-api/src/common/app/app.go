@@ -4,10 +4,9 @@ import (
 	"context"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common"
-	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
 )
 
-func CreateApp(appCtx context.Context, config util.Config) (*common.Srv, error) {
+func CreateApp(appCtx context.Context, config common.Config) (*common.Srv, error) {
 	// Setup API server
 	server, err := common.NewServer(config)
 	if err != nil {
