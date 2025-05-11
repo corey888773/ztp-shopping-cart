@@ -14,7 +14,6 @@ type CartBuilder struct {
 
 type Product struct {
 	ProductDetails products.Product `json:"product_details"`
-	Quantity       int              `json:"quantity"`
 }
 
 type Cart struct {
@@ -47,7 +46,8 @@ func (cb *CartBuilder) addProduct(payload string) {
 	if cb.Products == nil {
 		cb.Products = make(map[string]int)
 	}
-	cb.Products[addToCartPayload.ProductID] += addToCartPayload.Quantity
+	cb.Products[addToCartPayload.ProductID] = 1 // Increment the quantity of the product if it already exists.
+	// But for now, we just set it to 1 since we ignore quantity
 }
 
 func (cb *CartBuilder) removeProduct(payload string) {
@@ -78,10 +78,9 @@ func (cb *CartBuilder) WithCartID(cartID string) *CartBuilder {
 func (cb *CartBuilder) Build(productDetails []products.Product) *Cart {
 	productsWithDetails := make([]Product, 0, len(cb.Products))
 	for _, product := range productDetails {
-		if quantity, exists := cb.Products[product.ID]; exists {
+		if _, exists := cb.Products[product.ID]; exists {
 			productsWithDetails = append(productsWithDetails, Product{
 				ProductDetails: product,
-				Quantity:       quantity,
 			})
 		}
 	}

@@ -5,7 +5,6 @@ type EventType string
 const (
 	EventTypeAddToCart      EventType = "add_to_cart"
 	EventTypeRemoveFromCart EventType = "remove_from_cart"
-	EventTypeUpdateQuantity EventType = "update_quantity"
 	EventTypeCheckout       EventType = "checkout"
 )
 
@@ -23,5 +22,4 @@ type RemoveFromCartPayload struct {
 
 type AddToCartPayload struct {
 	ProductID string `json:"product_id"`
-	Quantity  int    `json:"quantity"`
 }

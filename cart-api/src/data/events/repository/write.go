@@ -37,7 +37,6 @@ func NewWriteCartRepository(db *gorm.DB) *WriteCartRepository {
 func (w WriteCartRepository) AddToCart(cmd add_to_cart.Command) error {
 	payload, err := json.Marshal(events.AddToCartPayload{
 		ProductID: cmd.ProductID,
-		Quantity:  cmd.Quantity,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal payload: %w", err)
