@@ -3,7 +3,7 @@ networks:
     driver: bridge
 
 services:
-  mongo-db:
+  postgres-cart-api:
     image: postgres:latest
     restart: always
     ports:
@@ -13,13 +13,31 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./postgres-data/cart:/var/lib/postgresql/data
     hostname:
       shopping-cart-postgres
     networks:
       - ztp
     container_name:
-      shopping-cart-postgres
+      carts-postgres
+
+  postgres-products-api:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres-data/products:/var/lib/postgresql/data
+    hostname:
+      products-postgres
+    networks:
+      - ztp
+    container_name:
+      products-postgres
 
 volumes:
   postgres-data:
