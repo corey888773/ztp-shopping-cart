@@ -1,5 +1,3 @@
 package commands
 
-const (
-	ErrInvalidCommand = "invalid command"
-)
+const ErrInvalidCommand = "invalid command"

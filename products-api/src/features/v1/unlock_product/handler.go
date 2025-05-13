@@ -38,7 +38,7 @@ func NewHandler(unitOfWork UnitOfWork, writeRepository WriteRepository, readRepo
 func (h *Handler) Handle(command interface{}) error {
 	cmd, ok := command.(*Command)
 	if !ok {
-		return errors.New("invalid command")
+		return errors.New(ErrInvalidCommand)
 	}
 
 	err := h.unitOfWork.Do(func(tx *gorm.DB) error {
@@ -53,12 +53,12 @@ func (h *Handler) Handle(command interface{}) error {
 		}
 
 		if prdRes.CartID != cmd.CartID {
-			return errors.New("product is not locked to this cart")
+			return errors.New(ErrProductIsNotLockedByThisCart)
 		}
 
 		lockedToTime, err := time.Parse(time.RFC3339, prdRes.LockedToTime)
 		if lockedToTime.Before(time.Now()) {
-			return errors.New("product is not locked")
+			return errors.New(ErrProductIsNotLocked)
 		}
 
 		err = h.writeRepository.UnlockProduct(cmd.ProductID, cmd.CartID, prdRes.SequenceNumber, tx)

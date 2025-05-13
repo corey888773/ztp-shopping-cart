@@ -3,7 +3,6 @@ package get_cart
 import (
 	"errors"
 
-	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/queries"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/data/events"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/external/products"
 )
@@ -35,7 +34,7 @@ func NewHandler(repo ReadRepository, productsSvc ProductsService, newCartBuilder
 func (h *Handler) Handle(query interface{}) (interface{}, error) {
 	qr, ok := query.(*Query)
 	if !ok {
-		return nil, errors.New(queries.ErrInvalidQuery)
+		return nil, errors.New(ErrInvalidQuery)
 	}
 
 	evs, err := h.repository.GetCartEvents(qr.CartID)
@@ -46,7 +45,7 @@ func (h *Handler) Handle(query interface{}) (interface{}, error) {
 
 	productsList := cartBuilder.GetProductsList()
 	if len(productsList) == 0 {
-		return nil, errors.New("no products found in the cart")
+		return nil, errors.New(ErrNoProductsFound)
 	}
 
 	productDetails, err := h.productsService.GetProductsByIDs(cartBuilder.GetProductsList())

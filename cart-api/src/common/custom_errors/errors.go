@@ -11,7 +11,7 @@ import (
 )
 
 func Handle(ctx *gin.Context, err error) {
-	log.Println(err)
+	log.Println("Error:", err)
 
 	var validationErrs validator.ValidationErrors
 	if errors.As(err, &validationErrs) {

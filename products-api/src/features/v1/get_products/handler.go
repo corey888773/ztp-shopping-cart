@@ -23,7 +23,7 @@ func NewHandler(repo ReadRepository) *Handler {
 func (h *Handler) Handle(query interface{}) (interface{}, error) {
 	qr, ok := query.(*Query)
 	if !ok {
-		return nil, errors.New("invalid query")
+		return nil, errors.New(ErrInvalidQuery)
 	}
 
 	productsList, err := h.readRepository.GetProductsByIDs(qr.ProductIDs)

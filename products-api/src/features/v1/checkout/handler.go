@@ -2,7 +2,6 @@ package checkout
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
@@ -39,7 +38,7 @@ func NewHandler(uow UnitOfWork, readRepository ReadRepository, writeRepository W
 func (h *Handler) Handle(command interface{}) error {
 	cmd, ok := command.(*Command)
 	if !ok {
-		return errors.New("invalid command")
+		return errors.New(ErrInvalidCommand)
 	}
 
 	reservations, err := h.readRepository.GetProductsReservations(cmd.ProductIDs)
@@ -48,14 +47,13 @@ func (h *Handler) Handle(command interface{}) error {
 	}
 
 	if len(reservations) == 0 {
-		return errors.New("no products found")
+		return errors.New(ErrNoProductsFound)
 	}
 
 	if util.Any(reservations, func(res products.ProductReservation) bool {
 		return res.CartID != cmd.CartID
 	}) {
-		fmt.Printf("cartID: %s, reservations: %+v\n", cmd.CartID, reservations)
-		return errors.New("product is not locked to this cart")
+		return errors.New(ErrProductIsNotLockedToThisCart)
 	}
 
 	if util.Any(reservations, func(res products.ProductReservation) bool {
@@ -65,7 +63,7 @@ func (h *Handler) Handle(command interface{}) error {
 		}
 		return lockedToTime.Before(time.Now())
 	}) {
-		return errors.New("some products are no longer locked")
+		return errors.New(ErrSomeProductsAreNoLongerLocked)
 	}
 
 	productIdsSequenceNumbersMap := make(map[string]int)

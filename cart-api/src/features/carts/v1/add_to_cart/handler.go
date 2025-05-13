@@ -2,8 +2,6 @@ package add_to_cart
 
 import (
 	"errors"
-
-	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/commands"
 )
 
 type WriteRepository interface {
@@ -36,7 +34,7 @@ func NewHandler(writeRepository WriteRepository, productsSvc ProductsService, re
 func (h *Handler) Handle(command interface{}) error {
 	cmd, ok := command.(*Command)
 	if !ok {
-		return errors.New(commands.ErrInvalidCommand)
+		return errors.New(ErrInvalidCommand)
 	}
 
 	checkedOut, err := h.readRepository.CheckIfCheckedOut(cmd.CartID)
@@ -45,7 +43,7 @@ func (h *Handler) Handle(command interface{}) error {
 	}
 
 	if checkedOut {
-		return errors.New("cart is already checked out")
+		return errors.New(ErrCartAlreadyCheckedOut)
 	}
 
 	err = h.productsService.LockProduct(cmd.ProductID, cmd.CartID)

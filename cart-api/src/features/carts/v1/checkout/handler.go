@@ -3,7 +3,6 @@ package checkout
 import (
 	"errors"
 
-	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/commands"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/data/events"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/features/carts/v1/get_cart"
@@ -55,7 +54,7 @@ func NewHandler(
 func (h *Handler) Handle(command interface{}) error {
 	cmd, ok := command.(*Command)
 	if !ok {
-		return errors.New(commands.ErrInvalidCommand)
+		return errors.New(ErrInvalidCommand)
 	}
 
 	evs, err := h.readRepository.GetCartEvents(cmd.CartID)
@@ -64,7 +63,7 @@ func (h *Handler) Handle(command interface{}) error {
 	}
 
 	if alreadyCheckedOut(evs) {
-		return errors.New("cart has already been checked out")
+		return errors.New(ErrCartHasAlreadyCheckedOut)
 	}
 
 	err = h.writeRepository.Checkout(*cmd)
@@ -84,7 +83,7 @@ func (h *Handler) Handle(command interface{}) error {
 
 	cartDetails, ok := cart.(*get_cart.Cart)
 	if !ok {
-		return errors.New("failed to cast cart to Cart type")
+		return errors.New(ErrFailedToCastToCart)
 	}
 
 	productIDs := util.Map(cartDetails.Products, func(p get_cart.Product) string {

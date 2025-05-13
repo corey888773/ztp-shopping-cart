@@ -2,7 +2,6 @@ package lock_product
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/corey888773/ztp-shopping-cart/products-api/src/common/util"
@@ -39,7 +38,7 @@ func NewHandler(unitOfWork UnitOfWork, writeRepository WriteRepository, readRepo
 func (h *Handler) Handle(command interface{}) error {
 	cmd, ok := command.(*Command)
 	if !ok {
-		return errors.New("invalid command")
+		return errors.New(ErrInvalidCommand)
 	}
 
 	action := func() error {
@@ -55,9 +54,8 @@ func (h *Handler) Handle(command interface{}) error {
 			}
 
 			lockedToTime, err := time.Parse(time.RFC3339, prdRes.LockedToTime)
-			fmt.Printf("lockedToTime: %s and current time: %s\n", lockedToTime, time.Now())
 			if lockedToTime.After(time.Now()) {
-				return errors.New("product is already locked")
+				return errors.New(ErrProductIsAlreadyLocked)
 			}
 
 			err = h.writeRepository.LockProduct(cmd.ProductID, cmd.CartID, prdRes.SequenceNumber, tx)
