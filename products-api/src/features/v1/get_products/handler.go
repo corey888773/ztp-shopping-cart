@@ -3,7 +3,7 @@ package get_products
 import (
 	"errors"
 
-	"github.com/corey888773/ztp-shopping-cart/products-api/data/products"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/data/products"
 )
 
 type ReadRepository interface {

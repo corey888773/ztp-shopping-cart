@@ -13,7 +13,6 @@ type ReadRepository interface {
 }
 
 type ProductsService interface {
-	GetProductByID(productID string) (products.Product, error)
 	GetProductsByIDs(productIDs []string) ([]products.Product, error)
 }
 

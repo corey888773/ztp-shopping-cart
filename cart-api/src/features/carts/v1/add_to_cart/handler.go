@@ -11,8 +11,8 @@ type WriteRepository interface {
 }
 
 type ProductsService interface {
-	LockProduct(productID string) error
-	UnlockProducts(productIDs []string) error
+	LockProduct(productID string, cartID string) error
+	UnlockProduct(productID string, cartID string) error
 }
 
 type Handler struct {
@@ -33,14 +33,14 @@ func (h *Handler) Handle(command interface{}) error {
 		return errors.New(commands.ErrInvalidCommand)
 	}
 
-	err := h.productsService.LockProduct(cmd.ProductID)
+	err := h.productsService.LockProduct(cmd.ProductID, cmd.CartID)
 	if err != nil {
 		return err
 	}
 
 	err = h.repository.AddToCart(*cmd)
 	if err != nil {
-		_ = h.productsService.UnlockProducts([]string{cmd.ProductID})
+		_ = h.productsService.UnlockProduct(cmd.ProductID, cmd.CartID)
 		return err
 	}
 

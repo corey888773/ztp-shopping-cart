@@ -1,8 +1,8 @@
 package data
 
 import (
-	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/lock_product"
-	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/unlock_product"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/lock_product"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/unlock_product"
 	"gorm.io/gorm"
 )
 

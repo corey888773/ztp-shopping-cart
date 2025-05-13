@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
-	"github.com/corey888773/ztp-shopping-cart/products-api/data/products"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/data/products"
 	"gorm.io/gorm"
 )
 

@@ -3,10 +3,10 @@ package repository
 import (
 	"time"
 
-	"github.com/corey888773/ztp-shopping-cart/products-api/data/products"
-	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/checkout"
-	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/lock_product"
-	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/unlock_product"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/data/products"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/checkout"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/lock_product"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/unlock_product"
 	"gorm.io/gorm"
 )
 

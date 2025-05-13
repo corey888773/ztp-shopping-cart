@@ -22,6 +22,7 @@ type Config struct {
 	PostgresPassword string `mapstructure:"POSTGRES_PASSWORD"`
 	PostgresSslMode  string `mapstructure:"POSTGRES_SSL_MODE"`
 	PostgresDbName   string `mapstructure:"POSTGRES_DB_NAME"`
+	ProductsApiUrl   string `mapstructure:"PRODUCTS_API_URL"`
 }
 
 type Srv struct {
@@ -44,7 +45,7 @@ func NewServer(config Config) (*Srv, error) {
 		return nil, err
 	}
 
-	productsService := products.ClientMock{}
+	productsService := products.NewClient(config.ProductsApiUrl)
 	notificationService := notifications.MockClient{}
 
 	writeCartRepository := repository.NewWriteCartRepository(postgresConn.DB)

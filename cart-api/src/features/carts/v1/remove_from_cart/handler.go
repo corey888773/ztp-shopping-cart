@@ -11,7 +11,7 @@ type WriteRepository interface {
 }
 
 type ProductsService interface {
-	UnlockProducts(productIDs []string) error
+	UnlockProduct(productID string, cartID string) error
 }
 
 type Handler struct {
@@ -37,7 +37,7 @@ func (h *Handler) Handle(command interface{}) error {
 		return err
 	}
 
-	err = h.productsService.UnlockProducts([]string{cmd.ProductID})
+	err = h.productsService.UnlockProduct(cmd.ProductID, cmd.CartID)
 	if err != nil {
 		return err
 	}

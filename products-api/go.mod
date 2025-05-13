@@ -1,6 +1,6 @@
 module github.com/corey888773/ztp-shopping-cart/products-api
 
-go 1.24
+go 1.23.1
 
 require (
 	github.com/corey888773/ztp-shopping-cart/cart-api v0.0.0-20250510184556-6fceafe0013d

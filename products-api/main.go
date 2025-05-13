@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
-	"github.com/corey888773/ztp-shopping-cart/products-api/common"
-	"github.com/corey888773/ztp-shopping-cart/products-api/common/app"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/common"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/common/app"
 )
 
 func main() {

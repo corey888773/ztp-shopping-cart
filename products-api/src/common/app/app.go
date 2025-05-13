@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/corey888773/ztp-shopping-cart/products-api/common"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/common"
 )
 
 func CreateApp(appCtx context.Context, config common.Config) (*common.Srv, error) {

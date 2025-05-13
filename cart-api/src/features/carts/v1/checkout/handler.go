@@ -23,7 +23,7 @@ type NotificationService interface {
 }
 
 type ProductsService interface {
-	CheckoutProducts(productIDs []string) error
+	CheckoutProducts(productIDs []string, cartID string) error
 }
 
 type GetCartQueryHandler interface {
@@ -93,7 +93,7 @@ func (h *Handler) Handle(command interface{}) error {
 		return p.ProductDetails.ID
 	})
 
-	err = h.productsService.CheckoutProducts(productIDs)
+	err = h.productsService.CheckoutProducts(productIDs, cmd.CartID)
 	if err != nil {
 		return err
 	}
