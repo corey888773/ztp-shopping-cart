@@ -44,6 +44,11 @@ func (h *Handler) Handle(query interface{}) (interface{}, error) {
 	}
 	cartBuilder := h.newCartBuilder(evs)
 
+	productsList := cartBuilder.GetProductsList()
+	if len(productsList) == 0 {
+		return nil, errors.New("no products found in the cart")
+	}
+
 	productDetails, err := h.productsService.GetProductsByIDs(cartBuilder.GetProductsList())
 	if err != nil {
 		return nil, err

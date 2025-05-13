@@ -10,20 +10,26 @@ type WriteRepository interface {
 	AddToCart(cmd Command) error
 }
 
+type ReadRepository interface {
+	CheckIfCheckedOut(cartID string) (bool, error)
+}
+
 type ProductsService interface {
 	LockProduct(productID string, cartID string) error
 	UnlockProduct(productID string, cartID string) error
 }
 
 type Handler struct {
-	repository      WriteRepository
+	writeRepository WriteRepository
 	productsService ProductsService
+	readRepository  ReadRepository
 }
 
-func NewHandler(repo WriteRepository, productsSvc ProductsService) *Handler {
+func NewHandler(writeRepository WriteRepository, productsSvc ProductsService, readRepository ReadRepository) *Handler {
 	return &Handler{
 		productsService: productsSvc,
-		repository:      repo,
+		writeRepository: writeRepository,
+		readRepository:  readRepository,
 	}
 }
 
@@ -33,12 +39,21 @@ func (h *Handler) Handle(command interface{}) error {
 		return errors.New(commands.ErrInvalidCommand)
 	}
 
-	err := h.productsService.LockProduct(cmd.ProductID, cmd.CartID)
+	checkedOut, err := h.readRepository.CheckIfCheckedOut(cmd.CartID)
 	if err != nil {
 		return err
 	}
 
-	err = h.repository.AddToCart(*cmd)
+	if checkedOut {
+		return errors.New("cart is already checked out")
+	}
+
+	err = h.productsService.LockProduct(cmd.ProductID, cmd.CartID)
+	if err != nil {
+		return err
+	}
+
+	err = h.writeRepository.AddToCart(*cmd)
 	if err != nil {
 		_ = h.productsService.UnlockProduct(cmd.ProductID, cmd.CartID)
 		return err

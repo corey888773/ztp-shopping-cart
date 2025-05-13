@@ -60,8 +60,8 @@ func NewServer(config Config) (*Srv, error) {
 	// Commands
 	cartCommandBus := cartcommands.NewCommandBus()
 
-	addToCartHandler := add_to_cart.NewHandler(writeCartRepository, productsService)
-	removeFromCartHandler := remove_from_cart.NewHandler(writeCartRepository, productsService)
+	addToCartHandler := add_to_cart.NewHandler(writeCartRepository, productsService, readCartRepository)
+	removeFromCartHandler := remove_from_cart.NewHandler(writeCartRepository, productsService, readCartRepository)
 	checkoutHandler := checkout.NewHandler(writeCartRepository, productsService, getCartHandler, notificationService, readCartRepository)
 
 	cartCommandBus.Register(&add_to_cart.Command{}, addToCartHandler)

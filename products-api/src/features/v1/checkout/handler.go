@@ -2,6 +2,7 @@ package checkout
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
@@ -53,6 +54,7 @@ func (h *Handler) Handle(command interface{}) error {
 	if util.Any(reservations, func(res products.ProductReservation) bool {
 		return res.CartID != cmd.CartID
 	}) {
+		fmt.Printf("cartID: %s, reservations: %+v\n", cmd.CartID, reservations)
 		return errors.New("product is not locked to this cart")
 	}
 

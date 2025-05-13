@@ -1,6 +1,7 @@
 package checkout
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/commands"
@@ -16,6 +17,7 @@ func Checkout(handler commands.Handler) gin.HandlerFunc {
 		}
 		err := handler.Handle(&cmd)
 		if err != nil {
+			fmt.Printf("Error handling command: %v\n", err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}

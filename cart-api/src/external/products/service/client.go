@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -51,7 +52,7 @@ func (c *Client) LockProduct(productID string, cartID string) error {
 	headers := map[string]string{
 		ContentTypeHeaders: JSONContentType,
 	}
-	resp, err := c.doRequest(http.MethodPost, "/products/lock", headers, buf)
+	resp, err := c.doRequest(http.MethodPost, "/api/v1/products/lock", headers, buf)
 	if err != nil {
 		return err
 	}
@@ -63,6 +64,7 @@ func (c *Client) LockProduct(productID string, cartID string) error {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
+		fmt.Printf("Code: %d\n", resp.StatusCode)
 		return errors.New("failed to lock product")
 	}
 
@@ -86,7 +88,7 @@ func (c *Client) UnlockProduct(productID string, cartID string) error {
 	headers := map[string]string{
 		ContentTypeHeaders: JSONContentType,
 	}
-	resp, err := c.doRequest(http.MethodPost, "/products/unlock", headers, buf)
+	resp, err := c.doRequest(http.MethodPost, "/api/v1/products/unlock", headers, buf)
 	if err != nil {
 		return err
 	}
@@ -121,7 +123,7 @@ func (c *Client) CheckoutProducts(productIDs []string, cartID string) error {
 	headers := map[string]string{
 		ContentTypeHeaders: JSONContentType,
 	}
-	resp, err := c.doRequest(http.MethodPost, "/products/checkout", headers, buf)
+	resp, err := c.doRequest(http.MethodPost, "/api/v1/products/checkout", headers, buf)
 	if err != nil {
 		return err
 	}
@@ -154,7 +156,7 @@ func (c *Client) GetProductsByIDs(productIDs []string) ([]products.Product, erro
 	headers := map[string]string{
 		ContentTypeHeaders: JSONContentType,
 	}
-	resp, err := c.doRequest(http.MethodPost, "/products/checkout", headers, buf)
+	resp, err := c.doRequest(http.MethodPost, "/api/v1/products", headers, buf)
 	if err != nil {
 		return nil, err
 	}
@@ -166,6 +168,14 @@ func (c *Client) GetProductsByIDs(productIDs []string) ([]products.Product, erro
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("RequestBody: %+v\n", requestBody)
+		bodyString, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Printf("ResponseBody: %s\n", bodyString)
+
+		fmt.Printf("Code: %d\n", resp.StatusCode)
 		return nil, errors.New("failed to get products")
 	}
 

@@ -2,7 +2,6 @@ package checkout
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/commands"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
@@ -60,7 +59,6 @@ func (h *Handler) Handle(command interface{}) error {
 	}
 
 	evs, err := h.readRepository.GetCartEvents(cmd.CartID)
-	fmt.Printf("events: %+v \n", evs)
 	if err != nil {
 		return err
 	}
