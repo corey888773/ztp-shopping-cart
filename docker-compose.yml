@@ -38,6 +38,7 @@ services:
       - ztp
     container_name:
       products-postgres
+    
 
 volumes:
   postgres-data:

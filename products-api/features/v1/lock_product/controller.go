@@ -9,11 +9,12 @@ import (
 
 func LockProduct(handler commands.Handler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id := ctx.Param("id")
-		command := Command{
-			ProductID: id,
+		var cmd Command
+		if err := ctx.ShouldBindJSON(&cmd); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
-		err := handler.Handle(&command)
+		err := handler.Handle(&cmd)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

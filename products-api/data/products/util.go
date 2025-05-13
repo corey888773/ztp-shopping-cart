@@ -2,7 +2,6 @@ package products
 
 import (
 	"fmt"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -11,9 +10,8 @@ func InitDbWithMockProducts(db *gorm.DB) error {
 	products := make([]Product, 0, 100)
 	for i := 1; i <= 100; i++ {
 		products = append(products, Product{
-			ID:           fmt.Sprintf("%d", i),
-			Name:         fmt.Sprintf("Product %d", i),
-			LockedToTime: time.Now().Format(time.RFC3339),
+			ID:   fmt.Sprintf("%d", i),
+			Name: fmt.Sprintf("Product %d", i),
 		})
 	}
 

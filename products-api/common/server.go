@@ -6,6 +6,7 @@ import (
 	"github.com/corey888773/ztp-shopping-cart/products-api/data"
 	"github.com/corey888773/ztp-shopping-cart/products-api/data/products"
 	"github.com/corey888773/ztp-shopping-cart/products-api/data/products/repository"
+	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/checkout"
 	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/get_products"
 	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/lock_product"
 	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/unlock_product"
@@ -62,6 +63,9 @@ func NewServer(config Config) (*Srv, error) {
 	unlockProductCommandHandler := unlock_product.NewHandler(unitOfWork, productsWriteRepository, productsReadRepository)
 	commandBus.Register(&unlock_product.Command{}, unlockProductCommandHandler)
 
+	checkoutCommandHandler := checkout.NewHandler(unitOfWork, productsReadRepository, productsWriteRepository)
+	commandBus.Register(&checkout.Command{}, checkoutCommandHandler)
+
 	return &Srv{
 		Router:     gin.Default(),
 		CommandBus: commandBus,
@@ -72,8 +76,9 @@ func NewServer(config Config) (*Srv, error) {
 func (s *Srv) SetupRouter() {
 	productRoutes := s.Router.Group("api/v1/products")
 	productRoutes.POST("/", get_products.GetProducts(s.QueryBus))
-	productRoutes.POST("/lock/:id", lock_product.LockProduct(s.CommandBus))
-	productRoutes.POST("/unlock/:id", unlock_product.UnlockProduct(s.CommandBus))
+	productRoutes.POST("/lock", lock_product.LockProduct(s.CommandBus))
+	productRoutes.POST("/unlock", unlock_product.UnlockProduct(s.CommandBus))
+	productRoutes.POST("/checkout", checkout.Checkout(s.CommandBus))
 }
 
 func (s *Srv) Start(httpAddress string) error {

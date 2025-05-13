@@ -2,8 +2,10 @@ package lock_product
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/corey888773/ztp-shopping-cart/products-api/common/util"
 	"github.com/corey888773/ztp-shopping-cart/products-api/data/products"
 	"gorm.io/gorm"
 )
@@ -13,10 +15,11 @@ type UnitOfWork interface {
 }
 
 type WriteRepository interface {
-	LockProduct(productID string, tx *gorm.DB) error
+	LockProduct(productID string, cartID string, seqNumber int, tx *gorm.DB) error
 }
 
 type ReadRepository interface {
+	GetProductReservation(productID string) (products.ProductReservation, error)
 	GetProduct(productID string) (products.Product, error)
 }
 
@@ -39,25 +42,33 @@ func (h *Handler) Handle(command interface{}) error {
 		return errors.New("invalid command")
 	}
 
-	err := h.unitOfWork.Do(func(tx *gorm.DB) error {
-		prd, err := h.readRepository.GetProduct(cmd.ProductID)
-		if err != nil {
-			return err
-		}
+	action := func() error {
+		return h.unitOfWork.Do(func(tx *gorm.DB) error {
+			_, err := h.readRepository.GetProduct(cmd.ProductID)
+			if err != nil {
+				return err
+			}
 
-		lockedToTime, err := time.Parse(time.RFC3339, prd.LockedToTime)
-		if lockedToTime.After(time.Now()) {
-			return errors.New("product is already locked")
-		}
+			prdRes, err := h.readRepository.GetProductReservation(cmd.ProductID)
+			if err != nil {
+				return err
+			}
 
-		err = h.writeRepository.LockProduct(cmd.ProductID, tx)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+			lockedToTime, err := time.Parse(time.RFC3339, prdRes.LockedToTime)
+			fmt.Printf("lockedToTime: %s and current time: %s\n", lockedToTime, time.Now())
+			if lockedToTime.After(time.Now()) {
+				return errors.New("product is already locked")
+			}
 
-	if err != nil {
+			err = h.writeRepository.LockProduct(cmd.ProductID, cmd.CartID, prdRes.SequenceNumber, tx)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+
+	if err := util.InvokeWithRetry(action, 1*time.Second, 3); err != nil {
 		return err
 	}
 

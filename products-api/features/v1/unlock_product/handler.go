@@ -13,11 +13,12 @@ type UnitOfWork interface {
 }
 
 type WriteRepository interface {
-	UnlockProduct(productID string, tx *gorm.DB) error
+	UnlockProduct(productID string, cartID string, sequenceNumber int, tx *gorm.DB) error
 }
 
 type ReadRepository interface {
 	GetProduct(productID string) (products.Product, error)
+	GetProductReservation(productID string) (products.ProductReservation, error)
 }
 
 type Handler struct {
@@ -41,17 +42,26 @@ func (h *Handler) Handle(command interface{}) error {
 	}
 
 	err := h.unitOfWork.Do(func(tx *gorm.DB) error {
-		prd, err := h.readRepository.GetProduct(cmd.ProductID)
+		_, err := h.readRepository.GetProduct(cmd.ProductID)
 		if err != nil {
 			return err
 		}
 
-		lockedToTime, err := time.Parse(time.RFC3339, prd.LockedToTime)
+		prdRes, err := h.readRepository.GetProductReservation(cmd.ProductID)
+		if err != nil {
+			return err
+		}
+
+		if prdRes.CartID != cmd.CartID {
+			return errors.New("product is not locked to this cart")
+		}
+
+		lockedToTime, err := time.Parse(time.RFC3339, prdRes.LockedToTime)
 		if lockedToTime.Before(time.Now()) {
 			return errors.New("product is not locked")
 		}
 
-		err = h.writeRepository.UnlockProduct(cmd.ProductID, tx)
+		err = h.writeRepository.UnlockProduct(cmd.ProductID, cmd.CartID, prdRes.SequenceNumber, tx)
 		if err != nil {
 			return err
 		}

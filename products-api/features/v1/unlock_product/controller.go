@@ -1,7 +1,6 @@
 package unlock_product
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/commands"
@@ -10,12 +9,13 @@ import (
 
 func UnlockProduct(handler commands.Handler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id := ctx.Param("id")
-		command := Command{
-			ProductID: id,
+		var cmd Command
+		if err := ctx.ShouldBindJSON(&cmd); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
-		fmt.Printf("Command: %+v\n", command)
-		err := handler.Handle(&command)
+		
+		err := handler.Handle(&cmd)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/corey888773/ztp-shopping-cart/products-api/data/products"
+	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/checkout"
 	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/get_products"
 	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/lock_product"
 	"github.com/corey888773/ztp-shopping-cart/products-api/features/v1/unlock_product"
@@ -11,9 +14,40 @@ import (
 var _ get_products.ReadRepository = (*ReadProductsRepository)(nil)
 var _ lock_product.ReadRepository = (*ReadProductsRepository)(nil)
 var _ unlock_product.ReadRepository = (*ReadProductsRepository)(nil)
+var _ checkout.ReadRepository = (*ReadProductsRepository)(nil)
 
 type ReadProductsRepository struct {
 	db *gorm.DB
+}
+
+func (r *ReadProductsRepository) GetProductsReservations(productIDs []string) ([]products.ProductReservation, error) {
+	var productReservations []products.ProductReservation
+	// return max by sequence number for each product
+	err := r.db.Table("product_reservations").
+		Select("DISTINCT ON (product_id) *").
+		Where("product_id IN ?", productIDs).
+		Order("product_id, sequence_number desc").
+		Find(&productReservations).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return productReservations, nil
+}
+
+func (r *ReadProductsRepository) GetProductReservation(productID string) (products.ProductReservation, error) {
+	var productReservation products.ProductReservation
+	err := r.db.Where("product_id = ?", productID).Order("sequence_number desc").First(&productReservation).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return products.ProductReservation{}, nil // if not found, return empty product reservation
+		} else {
+			return products.ProductReservation{}, err
+		}
+	}
+
+	return productReservation, nil
 }
 
 func (r *ReadProductsRepository) GetProduct(productID string) (products.Product, error) {

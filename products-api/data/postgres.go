@@ -47,6 +47,7 @@ func NewPostgresConnector(config PostgresConfig) (*PostgresConnector, error) {
 
 	// auto migrate the database
 	err = db.AutoMigrate(&products.Product{})
+	err = db.AutoMigrate(&products.ProductReservation{})
 	if err != nil {
 		return nil, err
 	}
