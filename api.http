@@ -1,0 +1,67 @@
+@baseUrl = http://localhost:8002/api/v1
+
+###
+# Carts API
+
+### Get Cart
+GET {{baseUrl}}/carts/3
+
+### Add To Cart
+POST {{baseUrl}}/carts
+Content-Type: application/json
+
+{
+  "cart_id": "3",
+  "product_id": "13"
+}
+
+### Remove From Cart
+DELETE {{baseUrl}}/carts
+Content-Type: application/json
+
+{
+  "cart_id": "3",
+  "product_id": "59"
+}
+
+### Checkout Cart
+POST {{baseUrl}}/carts/checkout/3
+
+###
+# Products API
+
+### Get Products
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "product_ids": ["1", "2", "3"]
+}
+
+### Lock Product
+POST {{baseUrl}}/products/lock
+Content-Type: application/json
+
+{
+  "cart_id": "1",
+  "product_id": "1"
+}
+
+### Unlock Product
+POST {{baseUrl}}/products/unlock
+Content-Type: application/json
+
+{
+  "cart_id": "1",
+  "product_id": "1"
+}
+
+### Checkout Products
+POST {{baseUrl}}/products/checkout
+Content-Type: application/json
+
+{
+  "cart_id": "1"
+}
+### Get All Products
+GET {{baseUrl}}/products/all
