@@ -1,5 +1,9 @@
 package get_products
 
 const (
-	ErrInvalidQuery = "invalid query"
+	ErrInvalidQuery = "cannot fetch products: invalid query"
 )
+
+var DomainErrors = []string{
+	ErrInvalidQuery,
+}

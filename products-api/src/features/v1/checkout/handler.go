@@ -71,13 +71,15 @@ func (h *Handler) Handle(command interface{}) error {
 		productIdsSequenceNumbersMap[res.ProductID] = res.SequenceNumber
 	}
 
-	err = h.unitOfWork.Do(func(tx *gorm.DB) error {
+	if err = h.unitOfWork.Do(func(tx *gorm.DB) error {
 		err := h.writeRepository.CheckoutProducts(cmd.CartID, productIdsSequenceNumbersMap, tx)
 		if err != nil {
 			return err
 		}
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
 
 	return nil
 }

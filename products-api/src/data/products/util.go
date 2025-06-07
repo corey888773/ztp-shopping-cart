@@ -10,8 +10,9 @@ func InitDbWithMockProducts(db *gorm.DB) error {
 	products := make([]Product, 0, 100)
 	for i := 1; i <= 100; i++ {
 		products = append(products, Product{
-			ID:   fmt.Sprintf("%d", i),
-			Name: fmt.Sprintf("Product %d", i),
+			ID:          fmt.Sprintf("%d", i),
+			Name:        fmt.Sprintf("Product %d", i),
+			Description: fmt.Sprintf("Description for Product %d", i),
 		})
 	}
 

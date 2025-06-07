@@ -1,8 +1,9 @@
 package products
 
 type Product struct {
-	ID   string `json:"product_id" gorm:"primaryKey"`
-	Name string `json:"name" gorm:"column:name"`
+	ID          string `json:"product_id" gorm:"primaryKey"`
+	Name        string `json:"name" gorm:"column:name"`
+	Description string `json:"description" gorm:"column:description"`
 }
 
 type ProductReservation struct {

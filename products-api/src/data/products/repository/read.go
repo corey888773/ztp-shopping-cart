@@ -5,6 +5,7 @@ import (
 
 	"github.com/corey888773/ztp-shopping-cart/products-api/src/data/products"
 	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/checkout"
+	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/get_all_products"
 	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/get_products"
 	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/lock_product"
 	"github.com/corey888773/ztp-shopping-cart/products-api/src/features/v1/unlock_product"
@@ -15,6 +16,7 @@ var _ get_products.ReadRepository = (*ReadProductsRepository)(nil)
 var _ lock_product.ReadRepository = (*ReadProductsRepository)(nil)
 var _ unlock_product.ReadRepository = (*ReadProductsRepository)(nil)
 var _ checkout.ReadRepository = (*ReadProductsRepository)(nil)
+var _ get_all_products.ReadRepository = (*ReadProductsRepository)(nil)
 
 type ReadProductsRepository struct {
 	db *gorm.DB
@@ -64,6 +66,13 @@ func NewReadProductsRepository(db *gorm.DB) *ReadProductsRepository {
 	return &ReadProductsRepository{
 		db: db,
 	}
+}
+
+// GetAllProducts retrieves all products from the database.
+func (r *ReadProductsRepository) GetAllProducts() ([]products.Product, error) {
+	var productsList []products.Product
+	err := r.db.Find(&productsList).Error
+	return productsList, err
 }
 
 func (r *ReadProductsRepository) GetProductsByIDs(productIDs []string) ([]products.Product, error) {

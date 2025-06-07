@@ -1,6 +1,11 @@
 package lock_product
 
 const (
-	ErrInvalidCommand         = "invalid command"
-	ErrProductIsAlreadyLocked = "product is already locked"
+	ErrInvalidCommand         = "cannot lock product: invalid command"
+	ErrProductIsAlreadyLocked = "cannot lock product: product is already locked"
 )
+
+var DomainErrors = []string{
+	ErrInvalidCommand,
+	ErrProductIsAlreadyLocked,
+}

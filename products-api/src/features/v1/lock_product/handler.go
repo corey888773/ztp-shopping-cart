@@ -54,6 +54,10 @@ func (h *Handler) Handle(command interface{}) error {
 			}
 
 			lockedToTime, err := time.Parse(time.RFC3339, prdRes.LockedToTime)
+			if err != nil {
+				return err
+			}
+
 			if lockedToTime.After(time.Now()) {
 				return errors.New(ErrProductIsAlreadyLocked)
 			}

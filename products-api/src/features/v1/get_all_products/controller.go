@@ -1,4 +1,4 @@
-package get_products
+package get_all_products
 
 import (
 	"net/http"
@@ -8,22 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetProducts(handler queries.Handler) gin.HandlerFunc {
+// GetAllProducts returns a handler func for fetching all products.
+func GetAllProducts(handler queries.Handler) gin.HandlerFunc {
 	errHandler := features.NewErrorHandler(DomainErrors)
 
 	return func(ctx *gin.Context) {
-		var getProductsQuery Query
-		if err := ctx.ShouldBindJSON(&getProductsQuery); err != nil {
-			errHandler.Handle(ctx, err)
-			return
-		}
-
-		products, err := handler.Handle(&getProductsQuery)
+		products, err := handler.Handle(&Query{})
 		if err != nil {
 			errHandler.Handle(ctx, err)
 			return
 		}
-
 		ctx.JSON(http.StatusOK, products)
 	}
 }
