@@ -64,7 +64,6 @@ func (c *Client) LockProduct(productID string, cartID string) error {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusNoContent {
-		fmt.Printf("Code: %d\n", resp.StatusCode)
 		return errors.New("failed to lock product")
 	}
 

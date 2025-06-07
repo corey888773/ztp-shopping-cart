@@ -1,7 +1,15 @@
 package checkout
 
 const (
-	ErrInvalidCommand           = "invalid command"
-	ErrCartHasAlreadyCheckedOut = "cart has already checked out"
-	ErrFailedToCastToCart       = "failed to cast to cart"
+	ErrInvalidCommand           = "cannot checkout cart: invalid command"
+	ErrCartHasAlreadyCheckedOut = "cannot checkout cart: cart has already checked out"
+	ErrFailedToCastToCart       = "cannot checkout cart: failed to cast to cart"
+	ErrFailedToCheckoutProducts = "cannot checkout cart: failed to checkout products"
 )
+
+var DomainErrors = []string{
+	ErrInvalidCommand,
+	ErrCartHasAlreadyCheckedOut,
+	ErrFailedToCastToCart,
+	ErrFailedToCheckoutProducts,
+}

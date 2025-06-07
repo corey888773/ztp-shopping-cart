@@ -52,7 +52,7 @@ func (h *Handler) Handle(command interface{}) error {
 
 	err = h.productsService.UnlockProduct(cmd.ProductID, cmd.CartID)
 	if err != nil {
-		return err
+		return errors.New(ErrFailedToUnlockProduct)
 	}
 	return nil
 }

@@ -22,6 +22,7 @@ func Handle(ctx *gin.Context, err error) {
 		WithErrorMessage(ctx, strings.Join(msg, "; "), http.StatusBadRequest)
 		return
 	}
+	
 
 	if strings.Contains(err.Error(), "binding") {
 		WithError(ctx, InvalidInput, http.StatusBadRequest)
@@ -42,10 +43,8 @@ const (
 
 func WithError(ctx *gin.Context, message CustomErrorMessages, status int) {
 	ctx.JSON(status, gin.H{"error": message})
-	return
 }
 
 func WithErrorMessage(ctx *gin.Context, message string, status int) {
 	ctx.JSON(status, gin.H{"error": message})
-	return
 }

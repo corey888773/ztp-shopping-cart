@@ -5,6 +5,7 @@ import (
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/common/util"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/data/events"
+	"github.com/corey888773/ztp-shopping-cart/cart-api/src/external/products"
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/features/carts/v1/get_cart"
 )
 
@@ -86,13 +87,13 @@ func (h *Handler) Handle(command interface{}) error {
 		return errors.New(ErrFailedToCastToCart)
 	}
 
-	productIDs := util.Map(cartDetails.Products, func(p get_cart.Product) string {
-		return p.ProductDetails.ID
+	productIDs := util.Map(cartDetails.Products, func(p products.Product) string {
+		return p.ID
 	})
 
 	err = h.productsService.CheckoutProducts(productIDs, cmd.CartID)
 	if err != nil {
-		return err
+		return errors.New(ErrFailedToCheckoutProducts)
 	}
 
 	return nil

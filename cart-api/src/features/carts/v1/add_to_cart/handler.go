@@ -48,7 +48,7 @@ func (h *Handler) Handle(command interface{}) error {
 
 	err = h.productsService.LockProduct(cmd.ProductID, cmd.CartID)
 	if err != nil {
-		return err
+		return errors.New(ErrFailedToLockProduct)
 	}
 
 	err = h.writeRepository.AddToCart(*cmd)

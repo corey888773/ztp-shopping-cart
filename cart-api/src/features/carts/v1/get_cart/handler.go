@@ -41,18 +41,18 @@ func (h *Handler) Handle(query interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	cartBuilder := h.newCartBuilder(evs)
+	cartBuilder := h.newCartBuilder(evs).WithCartID(qr.CartID)
 
 	productsList := cartBuilder.GetProductsList()
 	if len(productsList) == 0 {
-		return nil, errors.New(ErrNoProductsFound)
+		return cartBuilder.Build([]products.Product{}), nil
 	}
 
-	productDetails, err := h.productsService.GetProductsByIDs(cartBuilder.GetProductsList())
+	productDetails, err := h.productsService.GetProductsByIDs(productsList)
 	if err != nil {
 		return nil, err
 	}
 
-	cart := cartBuilder.WithCartID(qr.CartID).Build(productDetails)
+	cart := cartBuilder.Build(productDetails)
 	return cart, nil
 }

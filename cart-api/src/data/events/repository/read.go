@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/corey888773/ztp-shopping-cart/cart-api/src/data/events"
@@ -24,6 +25,9 @@ func (r ReadCartRepository) CheckIfCheckedOut(cartID string) (bool, error) {
 	var lastEvent events.CartEvent
 	err := r.db.Where("cart_id = ?", cartID).Order("sequence_number desc").First(&lastEvent).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
 		return false, err
 	}
 
