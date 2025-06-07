@@ -81,6 +81,23 @@ services:
       - postgres-cart-api
       - products-api
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      - SERVER_PORT=8002
+      - CARTS_API_URL=http://cart-api:8000
+      - PRODUCTS_API_URL=http://products-api:8001
+    networks:
+      - ztp
+    depends_on:
+      - cart-api
+      - products-api
+
 volumes:
   postgres-data:
     driver: local
